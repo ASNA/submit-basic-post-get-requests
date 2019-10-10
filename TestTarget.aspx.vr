@@ -1,0 +1,62 @@
+﻿Using System
+Using System.Web
+Using System.Collections.Specialized
+Using SYstem.Collections.Generic
+
+BegClass TestTarget Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
+
+    BegSr Page_Load Access(*Private) Event(*This.Load)
+        DclSrParm sender Type(*Object)
+        DclSrParm e Type(System.EventArgs)
+
+        DclFld AccountNumber Type(*Integer4) 
+        DclFld SubmitData Type(NameValueCollection) New()
+        DclFld DataReceived Type( *String )        
+        DclFld ResponseData TYpe(*String) 
+        DclFld TransactionStatus Type(*String)
+      
+        Response.Clear()     
+        Response.BufferOutput = *True 
+
+        // In production code don't assume you can successfully convert any value! 
+        AccountNumber = Convert.ToInt32(Request['AccountNumber']) 
+        // In production a check would have been made against the data store to 
+        // determine the transaction status. Here, we're unconditionally blocking 
+        // account #256. (We heard that #256 listens to yacht rock on a regular basis
+        // and we just don't care for that!)    
+        If AccountNumber = 256 
+            TransactionStatus = 'Declined -- over credit limit'
+        Else
+            TransactionStatus = 'Approved'
+        EndIf  
+
+        SubmitData.Add('AccountNumber', Request['AccountNumber'])
+        SubmitData.Add('TransactionStatus', TransactionStatus)
+        SubmitData.Add('PaymentType', Request['PaymentType'])
+        SubmitData.Add('TransType', Request['TransType'])
+        SubmitData.Add('Amount', Request['Amount'])
+        SubmitData.Add('RequestType', HttpContext.Current.Request.HttpMethod)
+
+        ResponseData = EncodeData(SubmitData) 
+
+        Response.Write(ResponseData)
+        
+        Response.End() 
+    EndSr
+
+    // Encode a NameValueCollection and return as ampersand-separated string.
+    // Note: This is exactly the same function in StartPage.aspx.vr. Ideally 
+    // this function would only be in one place. 
+    BegFunc EncodeData Type(*String)
+        DclSrParm SubmitData Type(NameValueCollection) 
+        
+        DclFld Items Type(List(*Of *String)) New()
+        
+        ForEach Key Type(*String) Collection(SubmitData) 
+            Items.Add(String.Format('{0}={1}', key, System.Web.HttpUtility.UrlEncode(SubmitData[key])))
+        EndFor
+    
+        LeaveSr String.Join('&', Items.ToArray())        
+    EndFunc    
+
+EndClass

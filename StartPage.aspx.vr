@@ -1,0 +1,206 @@
+﻿Using System
+Using System.Web
+Using System.Net
+Using System.IO 
+Using System.Text 
+Using System.Collections.Specialized
+Using SYstem.Collections.Generic
+
+BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
+
+    BegEnum HttpVerb
+        DclEnumFld POST 
+        DclEnumFld GET
+    EndEnum 
+
+    BegSr buttonSubmitPostRequest_Click Access(*Private) Event(*This.buttonSubmitPostRequest.Click)
+        DclSrParm sender Type(*Object)
+        DclSrParm e Type(System.EventArgs)
+
+        DclFld SubmitData Type(NameValueCollection) 
+        DclFld DataReceived Type(NameValueCollection) 
+
+        SubmitData = CollectSubmitData()
+
+        // With POST verb, data is passed as an internal part of request content.
+        DataReceived = SubmitRequest(HttpVerb.POST, 'TestTarget.aspx', SubmitData)
+        ShowDataReceived(DataReceived) 
+    EndSr
+    
+    BegSr buttonSubmitGetRequest_Click Access(*Private) Event(*This.buttonSubmitGetRequest.Click)
+        DclSrParm sender Type(*Object)
+        DclSrParm e Type(System.EventArgs)
+
+        DclFld SubmitData Type(NameValueCollection) 
+        DclFld DataReceived Type(NameValueCollection) 
+
+        SubmitData = CollectSubmitData()
+
+        // With GET verb, data is passed as a query string.
+        DataReceived = SubmitRequest(HttpVerb.GET, 'TestTarget.aspx', SubmitData)       
+        ShowDataReceived(DataReceived) 
+    EndSr
+
+    BegSr ShowDataReceived 
+        DclSrParm DataReceived Type(NameValueCollection)
+
+        DclFld Buffer Type(StringBuilder) New()        
+
+        // ParseQueryString tranforms that query string value into
+        // a name/value pair. This keeps you needing to parse that query string yourself. 
+        buffer.Append('Data received from server:<br/>')
+        
+        ForEach Key Type(*String) Collection(DataReceived) 
+            Buffer.Append(String.Format(' &bull; {0}={1}<br>', Key, DataReceived[key])) 
+        EndFor 
+       
+        labelResponse.Text = Buffer.ToString()
+    EndSr 
+
+    BegFunc CollectSubmitData Type(NameValueCollection) 
+        DclFld SubmitData Type(NameValueCollection) New()
+
+        SubmitData.Add('AccountNumber', textboxAccountNumber.Text) 
+        SubmitData.Add('PaymentType', textboxPaymentType.Text)
+        SubmitData.Add('TransType', textboxTransType.Text)         
+        SubmitData.Add('Amount', textboxAmount.Text) 
+
+        LeaveSr SubmitData
+    EndFunc 
+
+    // Encode a NameValueCollection and return as ampersand-separated string.
+    BegFunc EncodeData Type(*String) 
+        DclSrParm SubmitData Type(NameValueCollection) 
+        
+        DclFld Items Type(List(*Of *String)) New()
+        
+        ForEach Key Type(*String) Collection(SubmitData) 
+            Items.Add(String.Format('{0}={1}', Key, System.Web.HttpUtility.UrlEncode(SubmitData[key])))
+        EndFor
+    
+        LeaveSr String.Join('&', Items.ToArray())        
+    EndFunc    
+
+    BegFunc GetUrlWithPort Type(*String) 
+        DclSrParm ASPXPage Type(*String) 
+
+        DclFld Port Type(*String) 
+
+        Port = HttpContext.Current.Request.Url.Port
+        LeaveSr String.Format('http://localhost:{0}/{1}', Port, ASPXPage)       
+    EndFunc 
+
+    BegFunc SubmitRequest Type(NameValueCollection) 
+        DclSrParm RequestType Type(HttpVerb) 
+        DclSrParm ASPXPage  Type(*String) 
+        DclSrParm SubmitData Type(NameValueCollection) 
+
+        DclFld url Type(*String) 
+        DclFld encodedData Type(*String) 
+        DclFld responseString Type(*String) 
+        DclFld dataReceived Type(NameValueCollection) 
+
+        url = GetUrlWithPort(ASPXPage) 
+       
+        // Convert your input values to a query string.
+        encodedData = EncodeData(SubmitData)
+        
+        // responseString is the server response.
+        If RequestType = HTTPVerb.POST
+            responseString = SubmitPostRequest(url, encodedData)
+        Else 
+            responseString = SubmitGetRequest(url, encodedData)
+        EndIF 
+       
+        // ParseQueryString tranforms that query string value into
+        // a name/value pair. This keeps you needing to parse that query string yourself. 
+        LeaveSr HttpUtility.ParseQueryString(responseString) 
+    EndFunc 
+       
+    BegFunc SubmitPostRequest Type(*String) 
+        DclSrParm Url Type(*String) 
+        DclSrParm Data Type(*String) 
+        
+        DclFld Encoding Type(ASCIIEncoding) New()
+        DclFld Request Type(HttpWebRequest) 
+        DclFld Response Type(HttpWebResponse) 
+        DclFld RequestStream Type(Stream) 
+        DclFld ResponseStream Type(Stream) 
+        DclFld ResponseString Type(*String) 
+        DclFld sr Type(StreamReader) 
+
+        DclArray DataAsBytes Type(byte) Rank(1) 
+        
+        DataAsBytes = Encoding.GetBytes(Data)
+
+        Request = WebRequest.Create(Url) *As HttpWebRequest 
+       
+        Request.Method = 'POST'
+        Request.ContentType = 'application/x-www-form-urlencoded'
+        Request.ContentLength = DataAsBytes.Length
+
+        Try 
+            // Send the request to the server.
+            RequestStream = Request.GetRequestStream()
+            RequestStream.Write(DataAsBytes, 0, DataAsBytes.Length)
+            RequestStream.Close()
+        Catch error Type(System.Exception)
+            DclFld x Type(*String)
+            x = error.Message 
+            // Handle exception error here.
+        EndTry
+        
+        // Fetch response from server as a string.
+        Response = Request.GetResponse() *As HttpWebResponse
+        If (Response.StatusCode = HttpStatusCode.OK)
+            ResponseStream = Response.GetResponseStream()
+            sr = *New StreamReader(responseStream) 
+            ResponseString = sr.ReadToEnd() 
+            sr.Close()
+        Else 
+            // Handle HttpStatusCode not OK here.            
+        EndIf
+        
+        LeaveSr ResponseString 
+    EndFunc                 
+    
+    BegFunc SubmitGetRequest Type(*String) 
+        DclSrParm Url Type(*String) 
+        DclSrParm Data Type(*String) 
+        
+        DclFld Encoding Type(ASCIIEncoding) New()
+        DclFld Request Type(HttpWebRequest) 
+        DclFld Response Type(HttpWebResponse) 
+        DclFld RequestStream Type(Stream) 
+        DclFld ResponseStream Type(Stream) 
+        DclFld ResponseString Type(*String) 
+        DclFld sr Type(StreamReader) 
+
+        Url = String.Format('{0}?{1}', Url, Data)         
+        
+        Request = WebRequest.Create(Url) *As HttpWebRequest         
+        Request.Method = 'GET'
+
+        Try 
+            // Send the request to the server.
+            requestStream = Request.GetRequestStream()
+            requestStream.Close()
+        Catch error Type(System.Exception)
+            // Handle exception error here.
+        EndTry
+        
+        // Fetch response from server as a string.
+        Response = Request.GetResponse() *As HttpWebResponse
+        If (Response.StatusCode = HttpStatusCode.OK)
+            responseStream = Response.GetResponseStream()
+            sr = *New StreamReader(responseStream) 
+            responseString = sr.ReadToEnd() 
+            sr.Close()
+        Else 
+            // Handle HttpStatusCode not OK here.            
+        EndIf
+        
+        LeaveSr responseString 
+    EndFunc                 
+
+EndClass
