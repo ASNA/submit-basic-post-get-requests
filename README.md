@@ -2,7 +2,7 @@
 
 This example shows to submit GET and POST requests with the [System.Net.WebRequest](https://docs.microsoft.com/en-us/dotnet/api/system.net.webrequest?view=netframework-4.7.1) class. 
 
-> This example was written with AVR for .NET 14.x and Visual Studio 2015. It should also work in any higher version of AVR for .NET. It will probably work in older versions, but there you'd need to cut and paste the code into the project. 
+> This example was written with AVR for .NET 14.x and Visual Studio 2015. It should also work in any higher version of AVR for .NET. It will probably work in older versions, but there you'd need to cut and paste the code into the project. To run the project put the project's files in a single folder and then use Visual Studio to open that folder as a Website. After setting `StartPage.aspx` as VS's start page, press `F5` to run the app. 
 
 This example was originally created as an example for making POST requests to an online payment site (in that case the customer was using [Dejavoo Systems](http://www.dejavoosystems.com/)). Most financial authorization sites use very simple HTTP POST requests against an HTTP endpoint. This example focuses mostly on sending the request, but to ensure the submission is working a little proxy "service" is provided (the `TestTarget.aspx` page).
 
