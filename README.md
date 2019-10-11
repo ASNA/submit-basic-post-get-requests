@@ -2,6 +2,8 @@
 
 This example shows to submit GET and POST requests with the [System.Net.WebRequest](https://docs.microsoft.com/en-us/dotnet/api/system.net.webrequest?view=netframework-4.7.1) class. 
 
+> This example was written with AVR for .NET 14.x and Visual Studio 2015. It should also work in any higher version of AVR for .NET. It will probably work in older versions, but there you'd need to cut and paste the code into the project. 
+
 This example was originally created as an example for making POST requests to an online payment site (in that case the customer was using [Dejavoo Systems](http://www.dejavoosystems.com/)). Most financial authorization sites use very simple HTTP POST requests against an HTTP endpoint. This example focuses mostly on sending the request, but to ensure the submission is working a little proxy "service" is provided (the `TestTarget.aspx` page).
 
 > A pedantic programmer somewhere is going to argue with me for using an ASPX page as a service provider. I'm defining "service" here as any HTTP request/response not seen by human eyeballs and intended to be consumed by another computer and/or program. This is one of several ASNA examples on service-related Web work. [See this link for more service-related examples](https://github.com/search?q=topic%3Aservices+org%3AASNA&type=Repositories)
