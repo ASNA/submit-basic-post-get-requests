@@ -23,7 +23,8 @@ BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 
         SubmitData = CollectSubmitData()
 
-        // With POST verb, data is passed as an internal part of request content.
+        // With POST verb, data is passed as an internal part of 
+        // the request body.
         DataReceived = SubmitRequest(HttpVerb.POST, 'TestTarget.aspx', SubmitData)
         ShowDataReceived(DataReceived) 
     EndSr
@@ -186,8 +187,12 @@ BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 
         DclFld Port Type(*String) 
 
-        Port = HttpContext.Current.Request.Url.Port
-        LeaveSr String.Format('http://localhost:{0}/{1}', Port, ASPXPage)       
+        If HttpContext.Current.Request.Url.Host.ToLower() = 'localhost' 
+            Port = HttpContext.Current.Request.Url.Port
+            LeaveSr String.Format('http://localhost:{0}/{1}', Port, ASPXPage)       
+        Else 
+            LeaveSr ASPXPage
+        EndIf 
     EndFunc 
 
     BegSr ShowDataReceived 
@@ -195,8 +200,6 @@ BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 
         DclFld Buffer Type(StringBuilder) New()        
 
-        // ParseQueryString tranforms that query string value into
-        // a name/value pair. This keeps you needing to parse that query string yourself. 
         buffer.Append('Data received from server:<br/>')
         
         ForEach Key Type(*String) Collection(DataReceived) 
