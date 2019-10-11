@@ -39,8 +39,7 @@ BegClass TestTarget Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 
         ResponseData = EncodeData(SubmitData) 
 
-        Response.Write(ResponseData)
-        
+        Response.Write(ResponseData)        
         Response.End() 
     EndSr
 

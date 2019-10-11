@@ -13,7 +13,8 @@ BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
         DclEnumFld GET
     EndEnum 
 
-    BegSr buttonSubmitPostRequest_Click Access(*Private) Event(*This.buttonSubmitPostRequest.Click)
+    BegSr InitiateSubmitPostRequest Access(*Private) + 
+                                    Event(*This.buttonSubmitPostRequest.Click)
         DclSrParm sender Type(*Object)
         DclSrParm e Type(System.EventArgs)
 
@@ -27,7 +28,8 @@ BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
         ShowDataReceived(DataReceived) 
     EndSr
     
-    BegSr buttonSubmitGetRequest_Click Access(*Private) Event(*This.buttonSubmitGetRequest.Click)
+    BegSr InitiateSubmitGetRequest Access(*Private) +
+                                   Event(*This.buttonSubmitGetRequest.Click)
         DclSrParm sender Type(*Object)
         DclSrParm e Type(System.EventArgs)
 
@@ -40,55 +42,6 @@ BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
         DataReceived = SubmitRequest(HttpVerb.GET, 'TestTarget.aspx', SubmitData)       
         ShowDataReceived(DataReceived) 
     EndSr
-
-    BegSr ShowDataReceived 
-        DclSrParm DataReceived Type(NameValueCollection)
-
-        DclFld Buffer Type(StringBuilder) New()        
-
-        // ParseQueryString tranforms that query string value into
-        // a name/value pair. This keeps you needing to parse that query string yourself. 
-        buffer.Append('Data received from server:<br/>')
-        
-        ForEach Key Type(*String) Collection(DataReceived) 
-            Buffer.Append(String.Format(' &bull; {0}={1}<br>', Key, DataReceived[key])) 
-        EndFor 
-       
-        labelResponse.Text = Buffer.ToString()
-    EndSr 
-
-    BegFunc CollectSubmitData Type(NameValueCollection) 
-        DclFld SubmitData Type(NameValueCollection) New()
-
-        SubmitData.Add('AccountNumber', textboxAccountNumber.Text) 
-        SubmitData.Add('PaymentType', textboxPaymentType.Text)
-        SubmitData.Add('TransType', textboxTransType.Text)         
-        SubmitData.Add('Amount', textboxAmount.Text) 
-
-        LeaveSr SubmitData
-    EndFunc 
-
-    // Encode a NameValueCollection and return as ampersand-separated string.
-    BegFunc EncodeData Type(*String) 
-        DclSrParm SubmitData Type(NameValueCollection) 
-        
-        DclFld Items Type(List(*Of *String)) New()
-        
-        ForEach Key Type(*String) Collection(SubmitData) 
-            Items.Add(String.Format('{0}={1}', Key, System.Web.HttpUtility.UrlEncode(SubmitData[key])))
-        EndFor
-    
-        LeaveSr String.Join('&', Items.ToArray())        
-    EndFunc    
-
-    BegFunc GetUrlWithPort Type(*String) 
-        DclSrParm ASPXPage Type(*String) 
-
-        DclFld Port Type(*String) 
-
-        Port = HttpContext.Current.Request.Url.Port
-        LeaveSr String.Format('http://localhost:{0}/{1}', Port, ASPXPage)       
-    EndFunc 
 
     BegFunc SubmitRequest Type(NameValueCollection) 
         DclSrParm RequestType Type(HttpVerb) 
@@ -112,11 +65,12 @@ BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
             responseString = SubmitGetRequest(url, encodedData)
         EndIF 
        
-        // ParseQueryString tranforms that query string value into
-        // a name/value pair. This keeps you needing to parse that query string yourself. 
+        // ParseQueryString transforms that query string value into
+        // a name/value pair. This keeps you needing to parse 
+        // that query string yourself. 
         LeaveSr HttpUtility.ParseQueryString(responseString) 
     EndFunc 
-       
+
     BegFunc SubmitPostRequest Type(*String) 
         DclSrParm Url Type(*String) 
         DclSrParm Data Type(*String) 
@@ -202,5 +156,54 @@ BegClass StartPage Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
         
         LeaveSr responseString 
     EndFunc                 
+
+    BegFunc CollectSubmitData Type(NameValueCollection) 
+        DclFld SubmitData Type(NameValueCollection) New()
+
+        SubmitData.Add('AccountNumber', textboxAccountNumber.Text) 
+        SubmitData.Add('PaymentType', textboxPaymentType.Text)
+        SubmitData.Add('TransType', textboxTransType.Text)         
+        SubmitData.Add('Amount', textboxAmount.Text) 
+
+        LeaveSr SubmitData
+    EndFunc 
+
+    // Encode a NameValueCollection and return as ampersand-separated string.
+    BegFunc EncodeData Type(*String) 
+        DclSrParm SubmitData Type(NameValueCollection) 
+        
+        DclFld Items Type(List(*Of *String)) New()
+        
+        ForEach Key Type(*String) Collection(SubmitData) 
+            Items.Add(String.Format('{0}={1}', Key, System.Web.HttpUtility.UrlEncode(SubmitData[key])))
+        EndFor
+    
+        LeaveSr String.Join('&', Items.ToArray())        
+    EndFunc    
+
+    BegFunc GetUrlWithPort Type(*String) 
+        DclSrParm ASPXPage Type(*String) 
+
+        DclFld Port Type(*String) 
+
+        Port = HttpContext.Current.Request.Url.Port
+        LeaveSr String.Format('http://localhost:{0}/{1}', Port, ASPXPage)       
+    EndFunc 
+
+    BegSr ShowDataReceived 
+        DclSrParm DataReceived Type(NameValueCollection)
+
+        DclFld Buffer Type(StringBuilder) New()        
+
+        // ParseQueryString tranforms that query string value into
+        // a name/value pair. This keeps you needing to parse that query string yourself. 
+        buffer.Append('Data received from server:<br/>')
+        
+        ForEach Key Type(*String) Collection(DataReceived) 
+            Buffer.Append(String.Format(' &bull; {0}={1}<br>', Key, DataReceived[key])) 
+        EndFor 
+       
+        labelResponse.Text = Buffer.ToString()
+    EndSr           
 
 EndClass
