@@ -4,13 +4,11 @@ This example shows to submit GET and POST requests with the [System.Net.WebReque
 
 > This example was written with AVR for .NET 14.x and Visual Studio 2015. It should also work in any higher version of AVR for .NET. It will probably work in older versions, but there you'd need to cut and paste the code into the project. To run the project put the project's files in a single folder and then use Visual Studio to open that folder as a Website. After setting `StartPage.aspx` as VS's start page, press `F5` to run the app. 
 
-This example was originally created as an example for making POST requests to an online payment site (in that case the customer was using [Dejavoo Systems](http://www.dejavoosystems.com/)). Most financial authorization sites use very simple HTTP POST requests against an HTTP endpoint. This example focuses mostly on sending the request, but to ensure the submission is working a little proxy "service" is provided (the `TestTarget.aspx` page).
+This example was originally created as an example for making POST requests to an online payment site (in that case the customer was using [Dejavoo Systems](http://www.dejavoosystems.com/)). Most financial authorization sites use very simple HTTP POST requests against an HTTP endpoint. This example focuses mostly on sending the request, but to ensure the submission is working a little proxy "service" is provided (the `TestTarget.aspx` page). The service end point of this example's request is another page in the same Web app. That's only for testing and example purposes. In production use, the service end point would usually be external to the page calling the end point (as would be the case if one of your pages needs to reach out to a service like Dejavoo).
 
 > A pedantic programmer somewhere is going to argue with me for using an ASPX page as a service provider. I'm defining "service" here as any HTTP request/response not seen by human eyeballs and intended to be consumed by another computer and/or program. This is one of several ASNA examples on service-related Web work. [See this link for more service-related examples](https://github.com/search?q=topic%3Aservices+org%3AASNA&type=Repositories)
 
-Most financial sites require data submitted with an HTTP POST, but for completeness this example shows how to do both POST and GET requests. For very simple requests the GET method works fine. The difference in the two is the way data is passed to the target endpoint. POST requests send the request data within the request body; GET requests send the request data as a query string. 
-
-> There are several other HTTP verbs (including DELETE, PUT, PATCH, etc). Using those verbs is beyond the context of this article. 
+Most financial sites require data submitted with an HTTP POST, but for completeness this example shows how to do both POST and GET requests. For very simple requests the GET method works fine. The difference in the two is the way data is passed to the target endpoint. POST requests send the request data within the request body; GET requests send the request data as a query string. There are several other HTTP verbs (including DELETE, PUT, PATCH, etc). Using those verbs is beyond the context of this article. 
 
 While POST requests are sometimes considered more secure than GET requests, that's true only in the most basic sense. It is true that GET requests expose the data directly to eyeballs (in both the URL and secondary places like activity logs) and do potentially enable [cross-site request forgery](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)), but otherwise POST data is as easily comprised as request data. More critical differences between the two are:
 
@@ -18,6 +16,8 @@ While POST requests are sometimes considered more secure than GET requests, that
 * **Maximum data length.** Query string maximum lengths aren't formally defined and vary by browser and Web server. 1024 characters is generally accepted as a safe maximum (which includes keys and values). If you need to send more data than that it's probably best to use POST requests. 
 
 > All of the code in this example to make HTTP requests can be used in all varieties of Windows and Web apps. 
+
+
 
 ### The example's ASPX pages
 
